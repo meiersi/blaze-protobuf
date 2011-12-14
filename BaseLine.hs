@@ -115,15 +115,16 @@ testValue = MediaContent
         Nothing
     )
 
-
 ------------------------------------------------------------------------------
--- Manual encoding in custom binary format (similar to the 'binary' library)
+-- Binary encodings
 ------------------------------------------------------------------------------
 
 -- | Abbreviate 'mappend'.
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 
+-- Manual encoding in custom binary format (similar to the 'binary' library)
+----------------------------------------------------------------------------
 
 binString :: String -> Builder
 binString cs = 
@@ -162,6 +163,16 @@ binMediaContent :: MediaContent -> Builder
 binMediaContent (MediaContent images media) = 
   binList binImage images <> binMedia media
 
+-- Google's protocol buffer format
+----------------------------------
+
+-- To be done.
+
+------------------------------------------------------------------------------
+-- Benchmarking code
+------------------------------------------------------------------------------
+
+main :: IO ()
 main = defaultMain
   [ bench "bin/manual" $ whnf 
         (L.length . toLazyByteString . binMediaContent) testValue

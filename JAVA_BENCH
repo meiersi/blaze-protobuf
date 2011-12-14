@@ -1,0 +1,53 @@
+Results from running the serializer benchmarks from
+https://github.com/eishay/jvm-serializers/wiki/ on my i7 running a 64-bit
+linux.
+
+┌─(simon@teapot)-(~/repositories/git/github/meiersi/eishay/jvm-serializers/tpc)-(kannan✔)
+└─╼ ./run  data/media.1.cks
+Checking correctness...                                                                            
+[done]                                                                                             
+                                 create     ser   +same   deser   +shal   +deep   total   size  +dfl
+java-built-in                       113    7773    6986   34644   35744   34869   42641    889   514
+java-manual                         125     967     899     865     904     930    1897    255   147
+scala/java-built-in                 409   12506   10353   52802   54032   54537   67044   1312   700
+scala/sbinary                       409    2663    2284    1770    2011    2337    5000    255   147
+hessian                             113    6918    6745    8438    8453    8584   15502    501   313
+kryo                                130    1335    1246    1656    1659    1716    3051    233   147
+kryo-opt                            121    1138    1065    1486    1492    1568    2706    219   135
+kryo-manual                         122     874     796    1155    1207    1258    2132    219   132
+wobly                                89    1695    1573     940     985    1011    2705    251   151
+wobly-compact                        84    1754    1641     985    1001    1096    2850    225   139
+protobuf                            240    2652    1181    1227    1233    1595    4247    239   149
+protobuf/activemq+alt               204    2708      65      32     858    1841    4549    239   149
+protostuff                          165     667     540    1118    1194    1286    1953    239   150
+protostuff-manual                   123     619     541    1038    1095    1148    1768    239   150
+protostuff-runtime                  126     874     814    1377    1432    1548    2423    241   151
+protobuf/protostuff                 187     759     631    1126    1209    1436    2195    239   149
+thrift                              260    2887    2603    1528    1669    1681    4568    349   197
+thrift-compact                      249    2743    2365    1823    1884    2079    4822    240   148
+avro                                139    2327    2193    1650    2211    2832    5159    221   133
+avro-generic                        578    2611    2211    1321    2056    2878    5489    221   133
+msgpack                             131    1659    1312    1626    2227    1882    3540    233   146
+json/jackson/manual                 118    1338    1235    1883    1891    1974    3312    468   253
+json/jackson/databind               130    2251    2197    3609    3635    3636    5887    485   261
+json/jackson/databind-strings       111    3721    3854    5280    5005    5135    8856    485   261
+json/jackson/db-afterburner         121    2022    1827    2694    2594    2671    4693    485   261
+json/jackson/tree                   120    3148    3062    3850    4000    3973    7121    485   259
+json/jackson/tree-strings           123    4623    4801    5093    5447    5284    9907    485   259
+json/protostuff-manual              113    1690    1569    2517    2583    2585    4274    449   233
+json/protostuff-runtime             111    2057    1966    3022    3042    3073    5129    469   243
+json/google-gson/manual             117    7089    7053    6438    6456    7069   14157    468   253
+json/google-gson/manual/tree        114   10597   10904   12246   12210   12270   22867    485   259
+json/google-gson/databind           140   31888   31704   36580   37823   37193   69081    486   259
+json/svenson-databind               129    6933    7095   20029   18817   20047   26980    495   268
+json/flexjson/databind              116   31807   32428   82685   81826   83530  115337    503   273
+json/json-lib-databind              125   52698   54488  128428  130022  134536  187234    485   263
+json/fastjson/databind              133    3182    3004    1258    1292    1346    4528    468   255
+json/json.simple/manual             137   10432   10638   12690   11846   12727   23159    495   269
+json/json.simple/manual/tree        119    9911   11437   13716   13537   13971   23881    495   269
+json/json-smart/manual/tree         127    8477    8342    4987    5170    5200   13677    495   269
+json/org.json/manual/tree           129   10971   10944   12248   12469   12763   23734    485   259
+json/jsonij-jpath                   140   47346   49826   19436   20112   22582   69928    478   254
+json/jsonij-manual/tree             111   52438   49154    9965   10712   10056   62494    478   254
+json/argo-manual/tree               126  135287  138606   23378   22524   23402  158689    485   263
+

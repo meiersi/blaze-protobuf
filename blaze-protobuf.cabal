@@ -48,6 +48,7 @@ executable blaze-protobuf
   
   -- Other library packages from which modules are imported.
   build-depends:    base
-                  , bytestring == 0.9.0.1111
+                  , bytestring == 0.9.1.1111
                   , criterion  == 0.6.*
+                  , containers == 0.4.*
   

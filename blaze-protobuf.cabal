@@ -51,4 +51,6 @@ executable blaze-protobuf
                   , bytestring == 0.9.1.1111
                   , criterion  == 0.6.*
                   , containers == 0.4.*
+
+  ghc-options:    -O2
   

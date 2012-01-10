@@ -12,7 +12,6 @@ import           Data.ByteString.Lazy.Builder.Extras
 import           Data.ByteString.Lazy.Builder.BasicEncoding 
                  ( fromF, pairB, ifB, (>$<) )
 import qualified Data.ByteString.Lazy.Builder.BasicEncoding        as E
-import qualified Data.ByteString.Lazy.Builder.BasicEncoding.Extras as E
 import qualified Data.ByteString                                   as S
 import qualified Data.ByteString.Lazy                              as L
 import           Data.Foldable (foldMap)
@@ -229,11 +228,11 @@ type Tag = Int
 
 encodeWithVarLen :: Builder -> Builder
 encodeWithVarLen = 
-    E.encodeWithSize (fromIntegral defaultChunkSize) E.word64VarFixedBound
+    encodeSizePrefixed (untrimmedStrategy smallChunkSize smallChunkSize) word64Base128LEPadded
 
 {-# INLINE encodeTag #-}
 encodeTag :: E.BoundedEncoding Tag
-encodeTag = ifB (< 0x7f) (fromIntegral >$< fromF E.word8) E.intVar
+encodeTag = ifB (< 0x7f) (fromIntegral >$< fromF E.word8) (fromIntegral >$< E.wordBase128LE)
 
 {- Not working out
 encodeLen :: Word64 -> E.FixedEncoding Word64
@@ -244,13 +243,13 @@ encodeLen bound
 
 renderField :: Tag -> Field -> Builder
 renderField tag (Int32 i) = 
-    E.encodeWithB encInt32 (fromIntegral tag, i)
+    E.encodeWithB encInt32 (fromIntegral tag, fromIntegral i)
   where
-    encInt32 = encodeTag `pairB` E.int32Var
+    encInt32 = encodeTag `pairB` E.word32Base128LE
 renderField tag (Int64 i) =
-    E.encodeWithB encInt64 (fromIntegral tag, i)
+    E.encodeWithB encInt64 (fromIntegral tag, fromIntegral i)
   where
-    encInt64 = encodeTag `pairB` E.int64Var
+    encInt64 = encodeTag `pairB` E.word64Base128LE
 renderField tag (String cs)     = renderTaggedString  tag cs
 renderField tag (Message msg)   = renderTaggedMessage tag msg
 renderField tag (StringV css)   = foldMap (renderTaggedString  tag) css
@@ -258,7 +257,7 @@ renderField tag (MessageV msgs) = foldMap (renderTaggedMessage tag) msgs
 
 renderTaggedString :: Tag -> S.ByteString -> Builder
 renderTaggedString tag bs = 
-    E.encodeWithB encodeTag tag <> E.encodeWithB E.intVar (S.length bs) <>
+    E.encodeWithB encodeTag tag <> E.encodeWithB E.wordBase128LE (fromIntegral $ S.length bs) <>
     byteString bs
 
 {-
@@ -280,10 +279,10 @@ renderMessage = foldMap (uncurry renderField) . IM.toAscList . getMsg
 -------------------------------------------
 
 pbInt32 :: Int32 -> Builder
-pbInt32 = E.encodeWithB E.int32Var
+pbInt32 = E.encodeWithB E.word32Base128LE . fromIntegral
 
 pbInt64 :: Int64 -> Builder
-pbInt64 = E.encodeWithB E.int64Var
+pbInt64 = E.encodeWithB E.word64Base128LE . fromIntegral
 
 pbSize :: Size -> Builder
 pbSize = pbInt32 . fromIntegral . fromEnum
@@ -303,7 +302,7 @@ pbVar = pbTag 0
 
 pbString :: S.ByteString -> Builder
 pbString bs = 
-    E.encodeWithB E.intVar (S.length bs) <> byteString bs
+    E.encodeWithB E.wordBase128LE (fromIntegral $ S.length bs) <> byteString bs
     -- encodeWithVarLen $ byteString bs
     -- OUCH: encodeWithVarLen accounts for one third of the runtime
 
@@ -320,7 +319,7 @@ pbImage (Image uri title width height size) = -- encodeWithVarLen $
 
 pbMedia :: Media -> Builder
 pbMedia (Media uri title width height format duration size rate 
-                   people player copy) = -- encodeWithVarLen $
+                   people player copy) = encodeWithVarLen $
                   pbLDelim  1 <>    pbString  uri
   <> pbOptional ((pbLDelim  2 <>) . pbString) title
   <>              pbVar     3 <>    pbInt32   width
@@ -334,7 +333,7 @@ pbMedia (Media uri title width height format duration size rate
   <> pbOptional ((pbLDelim 11 <>) . pbString) copy
 
 pbMediaContent :: MediaContent -> Builder
-pbMediaContent (MediaContent images media) = -- encodeWithVarLen $
+pbMediaContent (MediaContent images media) = encodeWithVarLen $
      foldMap    ((pbLDelim  1 <>) . pbImage) images
   <>              pbLDelim  2 <>    pbMedia  media
 
@@ -475,7 +474,7 @@ oneWord8VarLen = encodeWithVarLen . word8
 
 oneWord8VarLenBase :: Word8 -> Builder
 oneWord8VarLenBase w = 
-    (E.encodeWithF (E.word64VarFixedBound w') w') <> word8 w
+    (E.encodeWithF (word64Base128LEPadded w') w') <> word8 w
   where
     w' = fromIntegral w
 
